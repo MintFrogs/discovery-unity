@@ -21,16 +21,21 @@ import com.google.android.gms.location.LocationServices;
 import com.unity3d.player.UnityPlayer;
 
 import java.util.ArrayList;
+import java.util.Date;
 
 public class Discovery implements ConnectionCallbacks, OnConnectionFailedListener, LocationListener {
   private static final String TAG = Discovery.class.getSimpleName();
   private static final String UNITY_OBJECT = "MfDiscoveryService";
-  private static final String UNITY_UPDATE_CALLBACK = "OnLocationUpdate";
-  private static final String UNITY_ERROR_CALLBACK = "OnLocationError";
+  private static final String UNITY_UPDATE_CALLBACK = "OnInnerLocationUpdate";
+  private static final String UNITY_ERROR_CALLBACK = "OnInnerLocationError";
+
+  private static final String PERMISSION_ERROR = "missing-permission";
+  private static final String CONNECTION_ERROR = "connection-error";
 
   private Settings mSettings;
   private GoogleApiClient mClient;
   private Context mContext;
+  private boolean mStarted;
 
   public Discovery(Settings settings, @Nullable Context context) {
     mSettings = settings;
@@ -39,7 +44,7 @@ public class Discovery implements ConnectionCallbacks, OnConnectionFailedListene
   }
 
   public void start() {
-    Log.i(TAG, "starting... \\w" + mClient);
+    Log.i(TAG, "starting... \\w" + mSettings);
 
     if (null != mClient) {
       mClient.connect();
@@ -47,8 +52,7 @@ public class Discovery implements ConnectionCallbacks, OnConnectionFailedListene
   }
 
   public void stop() {
-    Log.i(TAG, "stopping... \\w" + mClient);
-
+    Log.i(TAG, "stopping... \\w" + mSettings);
     stopUpdates();
 
     if (null != mClient) {
@@ -56,11 +60,19 @@ public class Discovery implements ConnectionCallbacks, OnConnectionFailedListene
     }
   }
 
+  public boolean isStarted() {
+    return mStarted;
+  }
+
   @SuppressWarnings("MissingPermission")
   public String queryLastLocation() {
     if (hasPermissions()) {
       Location location = LocationServices.FusedLocationApi.getLastLocation(mClient);
       return serializeLocationAsString(location);
+    }
+
+    if (isUnityEnv()) {
+      UnityPlayer.UnitySendMessage(UNITY_OBJECT, UNITY_ERROR_CALLBACK, PERMISSION_ERROR);
     }
 
     return "";
@@ -81,6 +93,11 @@ public class Discovery implements ConnectionCallbacks, OnConnectionFailedListene
   @Override
   public void onConnectionFailed(@NonNull ConnectionResult result) {
     Log.i(TAG, "connection failed... \\w" + mClient + " result: " + result);
+
+    if (isUnityEnv()) {
+      UnityPlayer.UnitySendMessage(UNITY_OBJECT, UNITY_ERROR_CALLBACK, CONNECTION_ERROR);
+    }
+
     stopUpdates();
   }
 
@@ -89,6 +106,8 @@ public class Discovery implements ConnectionCallbacks, OnConnectionFailedListene
     String args = serializeLocationAsString(location);
 
     if (isUnityEnv()) {
+      long timeStamp = new Date().getTime();
+      Log.i(TAG, "onLocationChanged[" + timeStamp + "]: " + args + " value: " + location);
       UnityPlayer.UnitySendMessage(UNITY_OBJECT, UNITY_UPDATE_CALLBACK, args);
     } else {
       Log.w(TAG, "onLocationChanged[null]: " + args);
@@ -108,7 +127,8 @@ public class Discovery implements ConnectionCallbacks, OnConnectionFailedListene
   private LocationRequest newLocationRequestInstance() {
     LocationRequest request = new LocationRequest();
     request.setInterval(mSettings.getUpdateInterval());
-    request.setFastestInterval(mSettings.getUpdateInterval());
+    request.setFastestInterval(mSettings.getFastestUpdateInterval());
+    request.setPriority(mSettings.getPriority());
     return request;
   }
 
@@ -117,11 +137,20 @@ public class Discovery implements ConnectionCallbacks, OnConnectionFailedListene
     if (hasPermissions()) {
       LocationRequest req = newLocationRequestInstance();
       LocationServices.FusedLocationApi.requestLocationUpdates(mClient, req, this);
+
+      mStarted = true;
+    } else {
+      if (isUnityEnv()) {
+        UnityPlayer.UnitySendMessage(UNITY_OBJECT, UNITY_ERROR_CALLBACK, PERMISSION_ERROR);
+      }
     }
   }
 
   private void stopUpdates() {
-    LocationServices.FusedLocationApi.removeLocationUpdates(mClient, this);
+    if (mStarted) {
+      LocationServices.FusedLocationApi.removeLocationUpdates(mClient, this);
+      mStarted = false;
+    }
   }
 
   private boolean hasPermissions() {

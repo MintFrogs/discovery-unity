@@ -8,64 +8,121 @@ namespace MintFrogs.Discovery
 {
   public class Discovery : MonoBehaviour
   {
-    public const int DefaultUpdateInterval = 1000;
-
+    private const string LogFmt = "Discovery::{0}";
     private const string DiscoveryClazz = "com.mintfrogs.discovery.android.Discovery";
     private const string DiscoverySettingsClazz = "com.mintfrogs.discovery.android.Settings";
 
-    [SerializeField]
-    private int interval;
-
-    [SerializeField]
-    private int accurancy;
-
+    private Settings currentSettings;
     private AndroidJavaObject currentDiscoverObject;
 
     public delegate void LocationHandler(Location location);
-    public event LocationHandler OnLocationUpdated;
+    public delegate void ErrorHandler(string error);
 
-    public void Initialize()
+    public event LocationHandler OnLocationUpdate;
+    public event ErrorHandler OnLocationError;
+
+    public static Discovery Instance { get; private set; }
+
+    public void Initialize(Settings settings)
     {
+      currentSettings = settings;
       InitializeAndroidImpl();
     }
 
     public void StartUpdates()
     {
-      if (null != currentDiscoverObject)
-      {
-        currentDiscoverObject.Call("start");
-      }
+      StartAndroidImpl();
     }
 
     public void StopUpdates()
     {
-      if (null != currentDiscoverObject)
-      {
-        currentDiscoverObject.Call("stop");
-      }
+      StopAndroidImpl();
+    }
+
+    public bool IsStarted()
+    {
+      return IsStartedAndroidImpl();
     }
 
     [UsedImplicitly]
     private void Awake()
     {
-      DontDestroyOnLoad(gameObject);
+      if (Instance != null && Instance != this)
+      {
+        Destroy(gameObject);
+      }
+      else
+      {
+        Instance = this;
+        DontDestroyOnLoad(gameObject);
+      }
     }
 
     [UsedImplicitly]
-    private void OnLocationUpdate(string serializedLocation)
+    private void OnInnerLocationUpdate(string serializedLocation)
     {
-      if (null != OnLocationUpdated)
+      if (null != OnLocationUpdate)
       {
-        OnLocationUpdated(Location.Parse(serializedLocation));
+        OnLocationUpdate(Location.Parse(serializedLocation));
+      }
+    }
+
+    [UsedImplicitly]
+    private void OnInnerLocationError(string error)
+    {
+      if (null != OnLocationError)
+      {
+        OnLocationError(error);
       }
     }
 
     private void InitializeAndroidImpl()
     {
-      var settingsObject = new AndroidJavaObject(DiscoverySettingsClazz);
-      var discoveryObject = new AndroidJavaObject(DiscoveryClazz, settingsObject);
+#if UNITY_ANDROID
+      var interval = currentSettings.Interval;
+      var fastestInterval = currentSettings.FastestInterval;
+      var accuracy = currentSettings.Accuracy;
+
+      var settingsObject = new AndroidJavaObject(DiscoverySettingsClazz, interval, fastestInterval, accuracy);
+      var discoveryObject = new AndroidJavaObject(DiscoveryClazz, settingsObject, null);
 
       currentDiscoverObject = discoveryObject;
+#endif
+    }
+
+    private void StartAndroidImpl()
+    {
+#if UNITY_ANDROID
+      if (null != currentDiscoverObject)
+      {
+        currentDiscoverObject.Call("start");
+      }
+      else
+      {
+        Debug.LogWarning(string.Format(LogFmt, "not initialized"));
+      }
+#endif
+    }
+
+    private void StopAndroidImpl()
+    {
+#if UNITY_ANDROID
+      if (null != currentDiscoverObject)
+      {
+        currentDiscoverObject.Call("stop");
+      }
+      else
+      {
+        Debug.LogWarning(string.Format(LogFmt, "not initialized"));
+      }
+#endif
+    }
+
+    private bool IsStartedAndroidImpl()
+    {
+#if UNITY_ANDROID
+      return null != currentDiscoverObject && currentDiscoverObject.Call<bool>("isStarted");
+#endif
     }
   }
 }

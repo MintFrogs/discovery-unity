@@ -20,18 +20,21 @@ namespace MintFrogs.Discovery
     private Button stopButton;
 
     [SerializeField]
-    private Discovery currentDiscivery;
+    private Discovery currentDiscovery;
 
     [UsedImplicitly]
     private void Start()
     {
-      currentDiscivery.OnLocationUpdated += OnLocationUpdated;
+      currentDiscovery.Initialize(new Settings());
+      currentDiscovery.OnLocationUpdate += OnLocationUpdate;
+      currentDiscovery.OnLocationError += OnLocationError;
     }
 
     [UsedImplicitly]
     private void Stop()
     {
-      currentDiscivery.OnLocationUpdated -= OnLocationUpdated;
+      currentDiscovery.OnLocationUpdate -= OnLocationUpdate;
+      currentDiscovery.OnLocationError -= OnLocationError;
     }
 
     public void OnInnerStartClick()
@@ -39,7 +42,7 @@ namespace MintFrogs.Discovery
       outputText.text = "starting...";
       startButton.interactable = false;
       stopButton.interactable = true;
-      currentDiscivery.StartUpdates();
+      currentDiscovery.StartUpdates();
     }
 
     public void OnInnerStopClick()
@@ -47,13 +50,19 @@ namespace MintFrogs.Discovery
       outputText.text = "stopping...";
       startButton.interactable = true;
       stopButton.interactable = false;
-      currentDiscivery.StopUpdates();
+      currentDiscovery.StopUpdates();
+      outputText.text = "Output Text";
     }
 
-    public void OnLocationUpdated(Location location)
+    public void OnLocationUpdate(Location location)
     {
       var now = DateTime.Now.ToString();
       outputText.text = now + ": " + location;
+    }
+
+    public void OnLocationError(string error)
+    {
+      outputText.text = "error: " + error;
     }
   }
 }

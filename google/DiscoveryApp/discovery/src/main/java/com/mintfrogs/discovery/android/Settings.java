@@ -3,7 +3,7 @@ package com.mintfrogs.discovery.android;
 import com.google.android.gms.location.LocationRequest;
 
 public class Settings {
-  public static final int DEFAULT_UPDATE_INTERVAL = 1500;
+  public static final int DEFAULT_UPDATE_INTERVAL = 1000;
   public static final int DEFAULT_PRIORITY = LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY;
 
   private int mUpdateInterval;
@@ -30,5 +30,12 @@ public class Settings {
 
   public int getPriority() {
     return mPriority;
+  }
+
+  @Override
+  public String toString() {
+    return "[" + "updateInterval=" + mUpdateInterval +
+        ", fastestUpdateInterval=" + mFastestUpdateInterval +
+        ", priority=" + mPriority + ']';
   }
 }
