@@ -47,4 +47,9 @@ static const NSUInteger kInnerAccuracyThreeKilometers = 6;
   
   return settings;
 }
+
+- (NSString *)description {
+  NSString *fmt = @"Discovery::settings: interval->%f accuracy->%f";
+  return [NSString stringWithFormat:fmt, self.updateInterval, self.accuracy];
+}
 @end

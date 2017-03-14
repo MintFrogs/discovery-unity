@@ -23,6 +23,18 @@ static const char *kLocationConnectionError = "connection-error";
 @end
 
 @implementation SXDiscoveryWarpper
++ (instancetype)sharedInstance
+{
+  static SXDiscoveryWarpper *instance = nil;
+  static dispatch_once_t token;
+  
+  dispatch_once(&token, ^{
+    instance = [[SXDiscoveryWarpper alloc] init];
+  });
+  
+  return instance;
+}
+
 - (void)initialize:(SXDiscoverySettings *)settings {
   self.settings = settings;
   
@@ -35,13 +47,18 @@ static const char *kLocationConnectionError = "connection-error";
     } else if (kCLAuthorizationStatusNotDetermined == sx) {
       self.manager = [[CLLocationManager alloc] init];
       self.manager.delegate = self;
-      self.manager.desiredAccuracy = settigs.accuracy;
+      self.manager.desiredAccuracy = self.settings.accuracy;
       
       [self.manager requestWhenInUseAuthorization];
     } else {
       self.manager = [[CLLocationManager alloc] init];
       self.manager.delegate = self;
-      self.manager.desiredAccuracy = settings.accuracy;
+      self.manager.desiredAccuracy = self.settings.accuracy;
+    }
+  } else {
+    if (self.isStarted) {
+      [self stop];
+      [self initialize:settings];
     }
   }
 }
@@ -49,7 +66,7 @@ static const char *kLocationConnectionError = "connection-error";
 - (void)start {
   if (nil != self.manager) {
     NSLog(@"Discovery: starting...");
-    [self.manager startMonitoringSignificantLocationChanges];
+    [self.manager startUpdatingLocation];
     self.started = true;
   }
 }
@@ -57,7 +74,7 @@ static const char *kLocationConnectionError = "connection-error";
 - (void)stop {
   if (nil != self.manager) {
     NSLog(@"Discovery: stopping...");
-    [self.manager stopMonitoringSignificantLocationChanges];
+    [self.manager stopUpdatingLocation];
     self.started = false;
   }
 }
@@ -78,9 +95,11 @@ static const char *kLocationConnectionError = "connection-error";
 - (void)locationManager:(CLLocationManager *)manager didUpdateLocations:(NSArray *)locations {
   CLLocation *location = [locations lastObject];
   NSDate *timeStamp = location.timestamp;
+  NSTimeInterval tx = [timeStamp timeIntervalSinceNow];
+  NSString *locationString = [self locationAsString:location];
   
-  
-  
+  NSLog(@"Discovery:didUpdateLocation[%f/%@]-> %@", tx, locationString, location);
+  UnitySendMessage(kUnityObject, kUnityLocationUpdate, [locationString UTF8String]);
 }
 
 - (void)locationManager:(CLLocationManager *)manager didFailWithError:(NSError *)error {

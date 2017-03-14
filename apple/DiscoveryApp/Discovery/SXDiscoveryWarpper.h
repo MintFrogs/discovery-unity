@@ -6,6 +6,8 @@
 #import "SXDiscoverySettings.h"
 
 @interface SXDiscoveryWarpper : NSObject
++ (instancetype)sharedInstance;
+
 - (void)initialize:(SXDiscoverySettings *)settings;
 - (void)start;
 - (void)stop;
