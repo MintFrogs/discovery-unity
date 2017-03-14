@@ -39,6 +39,11 @@ namespace MintFrogs.Discovery
       return new Location(lat, lng, alt, brg, acc);
     }
 
+    public static Location Default()
+    {
+      return new Location(53.9, 27.5667, 0, 0, 0);
+    }
+
     public double Lat
     {
       get { return lat; }

@@ -7,6 +7,7 @@
 
 FOUNDATION_EXPORT double DiscoveryVersionNumber;
 FOUNDATION_EXPORT const unsigned char DiscoveryVersionString[];
+FOUNDATION_EXPORT void UnitySendMessage(const char *, const char *, const char *);
 
 #ifdef __cplusplus
 extern "C" {

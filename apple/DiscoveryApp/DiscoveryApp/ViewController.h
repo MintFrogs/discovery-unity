@@ -4,5 +4,7 @@
 
 #import <UIKit/UIKit.h>
 
+void UnitySendMessage(const char *, const char *, const char *);
+
 @interface ViewController : UIViewController
 @end

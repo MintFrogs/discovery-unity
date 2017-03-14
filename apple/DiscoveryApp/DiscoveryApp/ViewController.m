@@ -5,6 +5,10 @@
 #import "ViewController.h"
 #import "SXDiscovery.h"
 
+void UnitySendMessage(const char *object, const char *message, const char *args) {
+  NSLog(@"Discovery[Dummy]::UnitySendMessage(%s, %s, %s)", object, message, args);
+}
+
 @interface ViewController ()
 @end
 

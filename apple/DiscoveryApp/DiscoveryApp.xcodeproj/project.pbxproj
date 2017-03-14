@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		BA5C661D1E77C6C900F99892 /* SXDiscovery.mm in Sources */ = {isa = PBXBuildFile; fileRef = BA5C661C1E77C6C900F99892 /* SXDiscovery.mm */; };
-		BA5C661F1E77CF8C00F99892 /* SXUnity.m in Sources */ = {isa = PBXBuildFile; fileRef = BA5C661E1E77CF8C00F99892 /* SXUnity.m */; };
 		BAC0A23C1E76CA130066E690 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = BAC0A23B1E76CA130066E690 /* main.m */; };
 		BAC0A23F1E76CA130066E690 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = BAC0A23E1E76CA130066E690 /* AppDelegate.m */; };
 		BAC0A2421E76CA130066E690 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = BAC0A2411E76CA130066E690 /* ViewController.m */; };
@@ -21,8 +20,6 @@
 		BAC0A2761E76D1050066E690 /* CoreLocation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BAC0A2751E76D1050066E690 /* CoreLocation.framework */; };
 		BAC0A27A1E76D1BD0066E690 /* SXDiscoveryWarpper.h in Headers */ = {isa = PBXBuildFile; fileRef = BAC0A2781E76D1BD0066E690 /* SXDiscoveryWarpper.h */; };
 		BAC0A27B1E76D1BD0066E690 /* SXDiscoveryWarpper.m in Sources */ = {isa = PBXBuildFile; fileRef = BAC0A2791E76D1BD0066E690 /* SXDiscoveryWarpper.m */; };
-		BAC0A2851E76E18D0066E690 /* SXUnity.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = BAC0A2821E76E18D0066E690 /* SXUnity.h */; };
-		BAC0A2891E76E1FA0066E690 /* libUnity.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BAC0A2801E76E18C0066E690 /* libUnity.a */; };
 		BAC0A28C1E76E91F0066E690 /* SXDiscoverySettings.h in Headers */ = {isa = PBXBuildFile; fileRef = BAC0A28A1E76E91F0066E690 /* SXDiscoverySettings.h */; };
 		BAC0A28D1E76E91F0066E690 /* SXDisciverySettings.m in Sources */ = {isa = PBXBuildFile; fileRef = BAC0A28B1E76E91F0066E690 /* SXDisciverySettings.m */; };
 /* End PBXBuildFile section */
@@ -49,21 +46,10 @@
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		BAC0A27E1E76E18C0066E690 /* CopyFiles */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "include/$(PRODUCT_NAME)";
-			dstSubfolderSpec = 16;
-			files = (
-				BAC0A2851E76E18D0066E690 /* SXUnity.h in CopyFiles */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		BA5C661C1E77C6C900F99892 /* SXDiscovery.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = SXDiscovery.mm; sourceTree = "<group>"; };
-		BA5C661E1E77CF8C00F99892 /* SXUnity.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SXUnity.m; sourceTree = "<group>"; };
 		BAC0A2371E76CA130066E690 /* DiscoveryApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DiscoveryApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		BAC0A23B1E76CA130066E690 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		BAC0A23D1E76CA130066E690 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -80,8 +66,6 @@
 		BAC0A2751E76D1050066E690 /* CoreLocation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreLocation.framework; path = System/Library/Frameworks/CoreLocation.framework; sourceTree = SDKROOT; };
 		BAC0A2781E76D1BD0066E690 /* SXDiscoveryWarpper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SXDiscoveryWarpper.h; sourceTree = "<group>"; };
 		BAC0A2791E76D1BD0066E690 /* SXDiscoveryWarpper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SXDiscoveryWarpper.m; sourceTree = "<group>"; };
-		BAC0A2801E76E18C0066E690 /* libUnity.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libUnity.a; sourceTree = BUILT_PRODUCTS_DIR; };
-		BAC0A2821E76E18D0066E690 /* SXUnity.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SXUnity.h; sourceTree = "<group>"; };
 		BAC0A28A1E76E91F0066E690 /* SXDiscoverySettings.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SXDiscoverySettings.h; sourceTree = "<group>"; };
 		BAC0A28B1E76E91F0066E690 /* SXDisciverySettings.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SXDisciverySettings.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -99,15 +83,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				BAC0A2891E76E1FA0066E690 /* libUnity.a in Frameworks */,
 				BAC0A2761E76D1050066E690 /* CoreLocation.framework in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		BAC0A27D1E76E18C0066E690 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -119,7 +95,6 @@
 			children = (
 				BAC0A2391E76CA130066E690 /* DiscoveryApp */,
 				BAC0A2681E76D0ED0066E690 /* Discovery */,
-				BAC0A2811E76E18D0066E690 /* Unity */,
 				BAC0A2381E76CA130066E690 /* Products */,
 				BAC0A2741E76D1050066E690 /* Frameworks */,
 			);
@@ -130,7 +105,6 @@
 			children = (
 				BAC0A2371E76CA130066E690 /* DiscoveryApp.app */,
 				BAC0A2671E76D0ED0066E690 /* Discovery.framework */,
-				BAC0A2801E76E18C0066E690 /* libUnity.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -189,15 +163,6 @@
 			name = Resources;
 			sourceTree = "<group>";
 		};
-		BAC0A2811E76E18D0066E690 /* Unity */ = {
-			isa = PBXGroup;
-			children = (
-				BAC0A2821E76E18D0066E690 /* SXUnity.h */,
-				BA5C661E1E77CF8C00F99892 /* SXUnity.m */,
-			);
-			path = Unity;
-			sourceTree = "<group>";
-		};
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
@@ -251,23 +216,6 @@
 			productReference = BAC0A2671E76D0ED0066E690 /* Discovery.framework */;
 			productType = "com.apple.product-type.framework";
 		};
-		BAC0A27F1E76E18C0066E690 /* Unity */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = BAC0A2861E76E18D0066E690 /* Build configuration list for PBXNativeTarget "Unity" */;
-			buildPhases = (
-				BAC0A27C1E76E18C0066E690 /* Sources */,
-				BAC0A27D1E76E18C0066E690 /* Frameworks */,
-				BAC0A27E1E76E18C0066E690 /* CopyFiles */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-			);
-			name = Unity;
-			productName = Unity;
-			productReference = BAC0A2801E76E18C0066E690 /* libUnity.a */;
-			productType = "com.apple.product-type.library.static";
-		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -283,11 +231,6 @@
 						ProvisioningStyle = Automatic;
 					};
 					BAC0A2661E76D0ED0066E690 = {
-						CreatedOnToolsVersion = 8.2.1;
-						DevelopmentTeam = DVGHG3NKW8;
-						ProvisioningStyle = Automatic;
-					};
-					BAC0A27F1E76E18C0066E690 = {
 						CreatedOnToolsVersion = 8.2.1;
 						DevelopmentTeam = DVGHG3NKW8;
 						ProvisioningStyle = Automatic;
@@ -309,7 +252,6 @@
 			targets = (
 				BAC0A2361E76CA120066E690 /* DiscoveryApp */,
 				BAC0A2661E76D0ED0066E690 /* Discovery */,
-				BAC0A27F1E76E18C0066E690 /* Unity */,
 			);
 		};
 /* End PBXProject section */
@@ -352,14 +294,6 @@
 				BAC0A28D1E76E91F0066E690 /* SXDisciverySettings.m in Sources */,
 				BAC0A27B1E76D1BD0066E690 /* SXDiscoveryWarpper.m in Sources */,
 				BA5C661D1E77C6C900F99892 /* SXDiscovery.mm in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		BAC0A27C1E76E18C0066E690 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				BA5C661F1E77CF8C00F99892 /* SXUnity.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -488,6 +422,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				DEVELOPMENT_TEAM = DVGHG3NKW8;
+				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = DiscoveryApp/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
@@ -501,6 +436,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				DEVELOPMENT_TEAM = DVGHG3NKW8;
+				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = DiscoveryApp/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
@@ -519,10 +455,16 @@
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = Discovery/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				MACH_O_TYPE = staticlib;
+				OTHER_LDFLAGS = (
+					"-undefined",
+					dynamic_lookup,
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.mintfrogs.discovery.Discovery;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -541,35 +483,21 @@
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = Discovery/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				MACH_O_TYPE = staticlib;
+				OTHER_LDFLAGS = (
+					"-undefined",
+					dynamic_lookup,
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.mintfrogs.discovery.Discovery;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
-			};
-			name = Release;
-		};
-		BAC0A2871E76E18D0066E690 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				DEVELOPMENT_TEAM = DVGHG3NKW8;
-				OTHER_LDFLAGS = "-ObjC";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SKIP_INSTALL = YES;
-			};
-			name = Debug;
-		};
-		BAC0A2881E76E18D0066E690 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				DEVELOPMENT_TEAM = DVGHG3NKW8;
-				OTHER_LDFLAGS = "-ObjC";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SKIP_INSTALL = YES;
 			};
 			name = Release;
 		};
@@ -599,15 +527,6 @@
 			buildConfigurations = (
 				BAC0A2711E76D0ED0066E690 /* Debug */,
 				BAC0A2721E76D0ED0066E690 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		BAC0A2861E76E18D0066E690 /* Build configuration list for PBXNativeTarget "Unity" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				BAC0A2871E76E18D0066E690 /* Debug */,
-				BAC0A2881E76E18D0066E690 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

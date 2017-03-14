@@ -22,6 +22,7 @@ public class DiscoveryAndroidDependencies : AssetPostprocessor
 
   public static void RegisterAndroidDependencies()
   {
+#if UNITY_ANDROID
     var playServicesSupport = Google.VersionHandler.FindClass(
       "Google.JarResolver", "Google.JarResolver.PlayServicesSupport");
 
@@ -59,5 +60,6 @@ public class DiscoveryAndroidDependencies : AssetPostprocessor
       {
         {"packageIds", new[] {"extra-android-m2repository"}}
       });
+#endif
   }
 }

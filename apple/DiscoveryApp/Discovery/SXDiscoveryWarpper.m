@@ -2,9 +2,9 @@
 //  Copyright © 2017 Sergey Ivonchik. All rights reserved.
 //
 
+#import "SXDiscovery.h"
 #import "SXDiscoveryWarpper.h"
 #import "SXDiscoverySettings.h"
-#import "SXUnity.h"
 #import <CoreLocation/CoreLocation.h>
 
 static const char *kUnityObject = "MfDiscoveryService";

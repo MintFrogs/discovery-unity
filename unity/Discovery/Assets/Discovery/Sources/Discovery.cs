@@ -4,6 +4,10 @@
 using JetBrains.Annotations;
 using UnityEngine;
 
+#if UNITY_IOS
+using System.Runtime.InteropServices;
+#endif
+
 namespace MintFrogs.Discovery
 {
   public class Discovery : MonoBehaviour
@@ -21,28 +25,65 @@ namespace MintFrogs.Discovery
     public event LocationHandler OnLocationUpdate;
     public event ErrorHandler OnLocationError;
 
+    // --------------------------------------------------------------------------------------------
+    // Public Interface
+    // --------------------------------------------------------------------------------------------
+
     public static Discovery Instance { get; private set; }
 
     public void Initialize(Settings settings)
     {
       currentSettings = settings;
+
+#if UNITY_ANDROID
       InitializeAndroidImpl();
+#elif UNITY_IOS
+      SXDiscoveryInitialize(settings.SerializeAsAppleNativeString());
+#else
+      Debug.Log("Discovery::Initialize(settings)");
+#endif
     }
 
     public void StartUpdates()
     {
+#if UNITY_ANDROID
       StartAndroidImpl();
+#elif UNITY_IOS
+      SXDiscoveryStart();
+#else
+
+#endif
+
+
+
     }
 
     public void StopUpdates()
     {
+#if UNITY_ANDROID
       StopAndroidImpl();
+#elif UNITY_IOS
+      SXDiscoveryStop();
+#else
+      Debug.Log("Discovery::Stop()");
+#endif
     }
 
     public bool IsStarted()
     {
+#if UNITY_ANDROID
       return IsStartedAndroidImpl();
+#elif UNITY_IOS
+      return SXDiscoveryIsStarted();
+#else
+      Debug.Log("Discovery::IsStarted()");
+      return false;
+#endif
     }
+
+    // --------------------------------------------------------------------------------------------
+    // Private Methods
+    // --------------------------------------------------------------------------------------------
 
     [UsedImplicitly]
     private void Awake()
@@ -75,6 +116,10 @@ namespace MintFrogs.Discovery
         OnLocationError(error);
       }
     }
+
+    // --------------------------------------------------------------------------------------------
+    // Android Impl
+    // --------------------------------------------------------------------------------------------
 
     private void InitializeAndroidImpl()
     {
@@ -122,7 +167,27 @@ namespace MintFrogs.Discovery
     {
 #if UNITY_ANDROID
       return null != currentDiscoverObject && currentDiscoverObject.Call<bool>("isStarted");
+#else
+      return false;
 #endif
     }
+
+    // --------------------------------------------------------------------------------------------
+    // iOS Impl
+    // --------------------------------------------------------------------------------------------
+
+#if UNITY_IOS
+    [DllImport("__Internal")]
+    private static extern void SXDiscoveryInitialize(string settings);
+
+    [DllImport("__Internal")]
+    private static extern void SXDiscoveryStart();
+
+    [DllImport("__Internal")]
+    private static extern void SXDiscoveryStop();
+
+    [DllImport("__Internal")]
+    private static extern bool SXDiscoveryIsStarted();
+#endif
   }
 }

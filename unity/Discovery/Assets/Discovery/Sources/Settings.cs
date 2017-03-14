@@ -28,5 +28,25 @@ namespace MintFrogs.Discovery
     public int FastestInterval { get; private set; }
 
     public int Accuracy { get; private set; }
+
+    public string SerializeAsAppleNativeString()
+    {
+      var accuracy = 2;
+
+      if (AccuracyHigh == Accuracy)
+      {
+        accuracy = 1;
+      }
+      else if (AccuracyBalanced == Accuracy)
+      {
+        accuracy = 2;
+      }
+      else if (AccuracyLow == Accuracy)
+      {
+        accuracy = 6;
+      }
+
+      return string.Format("{0};{1}", Interval, accuracy);
+    }
   }
 }
