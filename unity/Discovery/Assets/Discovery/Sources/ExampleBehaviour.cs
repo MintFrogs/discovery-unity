@@ -28,6 +28,8 @@ namespace MintFrogs.Discovery
       currentDiscovery.Initialize(new Settings());
       currentDiscovery.OnLocationUpdate += OnLocationUpdate;
       currentDiscovery.OnLocationError += OnLocationError;
+      currentDiscovery.OnLocationStatusUpdate += OnLocationStatusUpdate;
+      currentDiscovery.OnLocationPermissionsUpdate += OnLocationPermissionsUpdate;
     }
 
     [UsedImplicitly]
@@ -35,6 +37,8 @@ namespace MintFrogs.Discovery
     {
       currentDiscovery.OnLocationUpdate -= OnLocationUpdate;
       currentDiscovery.OnLocationError -= OnLocationError;
+      currentDiscovery.OnLocationStatusUpdate -= OnLocationStatusUpdate;
+      currentDiscovery.OnLocationPermissionsUpdate -= OnLocationPermissionsUpdate;
     }
 
     public void OnInnerStartClick()
@@ -54,6 +58,18 @@ namespace MintFrogs.Discovery
       outputText.text = "Output Text";
     }
 
+    public void OnInnerUpdateLocationStatus()
+    {
+      outputText.text = "quering status...";
+      currentDiscovery.QueryLocationServicesEnabled();
+    }
+
+    public void OnInnerUpdateLocationPermissions()
+    {
+      outputText.text = "quering permissions... has: [" + currentDiscovery.HasLocationPermissions() + "]";
+      currentDiscovery.RequestLocationPermissions();
+    }
+
     public void OnLocationUpdate(Location location)
     {
       var now = DateTime.Now.ToString();
@@ -63,6 +79,16 @@ namespace MintFrogs.Discovery
     public void OnLocationError(string error)
     {
       outputText.text = "error: " + error;
+    }
+
+    public void OnLocationStatusUpdate(bool isEnabled)
+    {
+      outputText.text = "onLocationUpdate: " + isEnabled;
+    }
+
+    public void OnLocationPermissionsUpdate(bool isAllowed)
+    {
+      outputText.text = "onLocationPermissionsUpdate: " + isAllowed;
     }
   }
 }

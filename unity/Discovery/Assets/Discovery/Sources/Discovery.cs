@@ -17,13 +17,17 @@ namespace MintFrogs.Discovery
     private const string DiscoverySettingsClazz = "com.mintfrogs.discovery.android.Settings";
 
     private Settings currentSettings;
-    private AndroidJavaObject currentDiscoverObject;
+    private AndroidJavaObject currentDiscoveryObject;
 
     public delegate void LocationHandler(Location location);
     public delegate void ErrorHandler(string error);
+    public delegate void LocationStatusHandler(bool isEnabled);
+    public delegate void LocationPermissionsHandler(bool isAllowed);
 
     public event LocationHandler OnLocationUpdate;
     public event ErrorHandler OnLocationError;
+    public event LocationStatusHandler OnLocationStatusUpdate;
+    public event LocationPermissionsHandler OnLocationPermissionsUpdate;
 
     // --------------------------------------------------------------------------------------------
     // Public Interface
@@ -51,11 +55,11 @@ namespace MintFrogs.Discovery
 #elif UNITY_IOS
       SXDiscoveryStart();
 #else
-
+      if (null != OnLocationUpdate)
+      {
+        OnLocationUpdate(Location.Default());
+      }
 #endif
-
-
-
     }
 
     public void StopUpdates()
@@ -78,6 +82,29 @@ namespace MintFrogs.Discovery
 #else
       Debug.Log("Discovery::IsStarted()");
       return false;
+#endif
+    }
+
+    public void QueryLocationServicesEnabled()
+    {
+#if UNITY_ANDROID
+      QueryLocationServicesEnabledAndroidImpl();
+#endif
+    }
+
+    public void RequestLocationPermissions()
+    {
+#if UNITY_ANDROID
+      RequestLocationPermissionsAndroidImpl();
+#endif
+    }
+
+    public bool HasLocationPermissions()
+    {
+#if UNITY_ANDROID
+      return HasLocationPermissionsAndroidImpl();
+#else
+      return UnityEngine.Input.location.isEnabledByUser;
 #endif
     }
 
@@ -117,6 +144,24 @@ namespace MintFrogs.Discovery
       }
     }
 
+    [UsedImplicitly]
+    private void OnInnerLocationPermissionsResult(string result)
+    {
+      if (null != OnLocationPermissionsUpdate)
+      {
+        OnLocationPermissionsUpdate(result == "true");
+      }
+    }
+
+    [UsedImplicitly]
+    private void OnInnerLocationResolutionCallback(string result)
+    {
+      if (null != OnLocationStatusUpdate)
+      {
+        OnLocationStatusUpdate(result == "true");
+      }
+    }
+
     // --------------------------------------------------------------------------------------------
     // Android Impl
     // --------------------------------------------------------------------------------------------
@@ -131,16 +176,16 @@ namespace MintFrogs.Discovery
       var settingsObject = new AndroidJavaObject(DiscoverySettingsClazz, interval, fastestInterval, accuracy);
       var discoveryObject = new AndroidJavaObject(DiscoveryClazz, settingsObject, null);
 
-      currentDiscoverObject = discoveryObject;
+      currentDiscoveryObject = discoveryObject;
 #endif
     }
 
     private void StartAndroidImpl()
     {
 #if UNITY_ANDROID
-      if (null != currentDiscoverObject)
+      if (null != currentDiscoveryObject)
       {
-        currentDiscoverObject.Call("start");
+        currentDiscoveryObject.Call("start");
       }
       else
       {
@@ -152,9 +197,9 @@ namespace MintFrogs.Discovery
     private void StopAndroidImpl()
     {
 #if UNITY_ANDROID
-      if (null != currentDiscoverObject)
+      if (null != currentDiscoveryObject)
       {
-        currentDiscoverObject.Call("stop");
+        currentDiscoveryObject.Call("stop");
       }
       else
       {
@@ -166,8 +211,49 @@ namespace MintFrogs.Discovery
     private bool IsStartedAndroidImpl()
     {
 #if UNITY_ANDROID
-      return null != currentDiscoverObject && currentDiscoverObject.Call<bool>("isStarted");
+      return null != currentDiscoveryObject && currentDiscoveryObject.Call<bool>("isStarted");
 #else
+      return false;
+#endif
+    }
+
+    private void QueryLocationServicesEnabledAndroidImpl()
+    {
+#if UNITY_ANDROID
+      if (null != currentDiscoveryObject)
+      {
+        currentDiscoveryObject.Call("isLocationServicesEnabled", null, true);
+      }
+      else
+      {
+        Debug.LogWarning(string.Format(LogFmt, "not initialized"));
+      }
+#endif
+    }
+
+    private void RequestLocationPermissionsAndroidImpl()
+    {
+#if UNITY_ANDROID
+      if (null != currentDiscoveryObject)
+      {
+        currentDiscoveryObject.Call("requestLocationPermissions");
+      }
+      else
+      {
+        Debug.LogWarning(string.Format(LogFmt, "not initialized"));
+      }
+#endif
+    }
+
+    private bool HasLocationPermissionsAndroidImpl()
+    {
+#if UNITY_ANDROID
+      if (null != currentDiscoveryObject)
+      {
+        return currentDiscoveryObject.Call<bool>("hasLocationPermissions");
+      }
+
+      Debug.LogWarning(string.Format(LogFmt, "not initialized"));
       return false;
 #endif
     }
