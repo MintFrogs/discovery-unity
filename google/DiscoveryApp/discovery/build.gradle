@@ -28,7 +28,7 @@ dependencies {
   })
 
   provided 'com.android.support:appcompat-v7:25.2.0'
-  provided 'com.google.android.gms:play-services-location:10.2.0'
+  provided 'com.google.android.gms:play-services-location:10.0.1'
 
   testCompile 'junit:junit:4.12'
 }

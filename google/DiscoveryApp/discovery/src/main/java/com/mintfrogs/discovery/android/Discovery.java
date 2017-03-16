@@ -1,9 +1,13 @@
 package com.mintfrogs.discovery.android;
 
 import android.Manifest.permission;
+import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Context;
+import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -15,9 +19,15 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks;
 import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener;
+import com.google.android.gms.common.api.PendingResult;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.LocationSettingsRequest;
+import com.google.android.gms.location.LocationSettingsResult;
+import com.google.android.gms.location.LocationSettingsStatusCodes;
 import com.unity3d.player.UnityPlayer;
 
 import java.util.ArrayList;
@@ -25,29 +35,54 @@ import java.util.Date;
 
 public class Discovery implements ConnectionCallbacks, OnConnectionFailedListener, LocationListener {
   private static final String TAG = Discovery.class.getSimpleName();
-  private static final String UNITY_OBJECT = "MfDiscoveryService";
-  private static final String UNITY_UPDATE_CALLBACK = "OnInnerLocationUpdate";
-  private static final String UNITY_ERROR_CALLBACK = "OnInnerLocationError";
+
+  public static final String UNITY_OBJECT = "MfDiscoveryService";
+  public static final String UNITY_UPDATE_CALLBACK = "OnInnerLocationUpdate";
+  public static final String UNITY_ERROR_CALLBACK = "OnInnerLocationError";
+  public static final String UNITY_PERMISSIONS_CALLBACK = "OnInnerLocationPermissionsResult";
+  public static final String UNITY_RESOLUTION_CALLBACK = "OnInnerLocationResolutionCallback";
+
+  public static int RESOLUTION_REQUEST = 0x010;
+  public static int PERMISSIONS_REQUEST = 0x020;
 
   private static final String PERMISSION_ERROR = "missing-permission";
   private static final String CONNECTION_ERROR = "connection-error";
 
   private Settings mSettings;
   private GoogleApiClient mClient;
-  private Context mContext;
+  private Activity mActivity;
   private boolean mStarted;
+  private boolean mStartUpdatesOnClientConnect;
 
-  public Discovery(Settings settings, @Nullable Context context) {
+  public interface OnLocationEnabledListener {
+    void onLocationEnabledResult(boolean isEnabled);
+  }
+
+  public static boolean isUnityEnv() {
+    try {
+      Class.forName("com.unity3d.player.UnityPlayer");
+      return true;
+    } catch (ClassNotFoundException e) {
+      return false;
+    }
+  }
+
+  public Discovery(Settings settings, @Nullable Activity atv) {
     mSettings = settings;
-    mContext = null == context ? UnityPlayer.currentActivity.getApplicationContext() : context;
-    mClient = newClientInstance(mContext);
+    mActivity = null == atv ? UnityPlayer.currentActivity : atv;
+    mClient = newClientInstance(mActivity.getApplicationContext());
   }
 
   public void start() {
     Log.i(TAG, "starting... \\w" + mSettings);
 
     if (null != mClient) {
-      mClient.connect();
+      if (mClient.isConnected()) {
+        startUpdates();
+      } else {
+        mStartUpdatesOnClientConnect = true;
+        mClient.connect();
+      }
     }
   }
 
@@ -64,9 +99,84 @@ public class Discovery implements ConnectionCallbacks, OnConnectionFailedListene
     return mStarted;
   }
 
+  public void isLocationServicesEnabled(@Nullable final OnLocationEnabledListener listener, final boolean isResolution) {
+    if (hasLocationPermissions()) {
+      LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder();
+      builder.addLocationRequest(newLocationRequestInstance());
+
+      PendingResult<LocationSettingsResult> result;
+      result = LocationServices.SettingsApi.checkLocationSettings(mClient, builder.build());
+
+      result.setResultCallback(new ResultCallback<LocationSettingsResult>() {
+        @Override
+        public void onResult(@NonNull LocationSettingsResult settingsResult) {
+          Status locationStatus = settingsResult.getStatus();
+          int statusCode = locationStatus.getStatusCode();
+
+          if (LocationSettingsStatusCodes.SUCCESS == statusCode) {
+            if (null != listener) {
+              listener.onLocationEnabledResult(true);
+            } else {
+              UnityPlayer.UnitySendMessage(UNITY_OBJECT, UNITY_RESOLUTION_CALLBACK, "true");
+            }
+          } else if (LocationSettingsStatusCodes.RESOLUTION_REQUIRED == statusCode) {
+            try {
+              if (isResolution) {
+                locationStatus.startResolutionForResult(mActivity, RESOLUTION_REQUEST);
+              } else {
+                if (null != listener) {
+                  listener.onLocationEnabledResult(false);
+                } else {
+                  UnityPlayer.UnitySendMessage(UNITY_OBJECT, UNITY_RESOLUTION_CALLBACK, "false");
+                }
+              }
+            } catch (IntentSender.SendIntentException e) {
+              if (null != listener) {
+                listener.onLocationEnabledResult(false);
+              } else {
+                UnityPlayer.UnitySendMessage(UNITY_OBJECT, UNITY_RESOLUTION_CALLBACK, "false");
+              }
+            }
+          } else {
+            if (null != listener) {
+              listener.onLocationEnabledResult(false);
+            } else {
+              UnityPlayer.UnitySendMessage(UNITY_OBJECT, UNITY_RESOLUTION_CALLBACK, "false");
+            }
+          }
+        }
+      });
+    } else {
+      if (isUnityEnv()) {
+        UnityPlayer.UnitySendMessage(UNITY_OBJECT, UNITY_ERROR_CALLBACK, PERMISSION_ERROR);
+      }
+    }
+  }
+
+  @SuppressLint("NewApi")
+  public void requestLocationPermissions() {
+    if (!hasLocationPermissions()) {
+      mActivity.requestPermissions(new String[]{
+          permission.ACCESS_FINE_LOCATION, permission.ACCESS_COARSE_LOCATION
+      }, PERMISSIONS_REQUEST);
+    }
+  }
+
+  public boolean hasLocationPermissions() {
+    if (Build.VERSION.SDK_INT < 23) {
+      return true;
+    }
+
+    int isFineGranted = ActivityCompat.checkSelfPermission(mActivity, permission.ACCESS_FINE_LOCATION);
+    int isCoarseGranted = ActivityCompat.checkSelfPermission(mActivity, permission.ACCESS_COARSE_LOCATION);
+
+    return !(isFineGranted != PackageManager.PERMISSION_GRANTED &&
+        isCoarseGranted != PackageManager.PERMISSION_GRANTED);
+  }
+
   @SuppressWarnings("MissingPermission")
   public String queryLastLocation() {
-    if (hasPermissions()) {
+    if (hasLocationPermissions()) {
       Location location = LocationServices.FusedLocationApi.getLastLocation(mClient);
       return serializeLocationAsString(location);
     }
@@ -80,8 +190,11 @@ public class Discovery implements ConnectionCallbacks, OnConnectionFailedListene
 
   @Override
   public void onConnected(@Nullable Bundle bundle) {
-    Log.i(TAG, "connected... \\w" + mClient + " bundle: " + bundle);
-    startUpdates();
+    Log.i(TAG, "connected[" + mStartUpdatesOnClientConnect + "]... \\w" + mClient + " bundle: " + bundle);
+
+    if (mStartUpdatesOnClientConnect) {
+      startUpdates();
+    }
   }
 
   @Override
@@ -134,7 +247,7 @@ public class Discovery implements ConnectionCallbacks, OnConnectionFailedListene
 
   @SuppressWarnings("MissingPermission")
   private void startUpdates() {
-    if (hasPermissions()) {
+    if (hasLocationPermissions()) {
       LocationRequest req = newLocationRequestInstance();
       LocationServices.FusedLocationApi.requestLocationUpdates(mClient, req, this);
 
@@ -153,14 +266,6 @@ public class Discovery implements ConnectionCallbacks, OnConnectionFailedListene
     }
   }
 
-  private boolean hasPermissions() {
-    int isFineGranted = ActivityCompat.checkSelfPermission(mContext, permission.ACCESS_FINE_LOCATION);
-    int isCoarseGranted = ActivityCompat.checkSelfPermission(mContext, permission.ACCESS_COARSE_LOCATION);
-
-    return !(isFineGranted != PackageManager.PERMISSION_GRANTED &&
-        isCoarseGranted != PackageManager.PERMISSION_GRANTED);
-  }
-
   private String serializeLocationAsString(@Nullable Location location) {
     if (null == location) {
       return "";
@@ -174,14 +279,5 @@ public class Discovery implements ConnectionCallbacks, OnConnectionFailedListene
     items.add(Float.toString(location.getAccuracy()));
 
     return TextUtils.join(";", items);
-  }
-
-  private boolean isUnityEnv() {
-    try {
-      Class.forName("com.unity3d.player.UnityPlayer");
-      return true;
-    } catch (ClassNotFoundException e) {
-      return false;
-    }
   }
 }
