@@ -81,7 +81,7 @@ namespace MintFrogs.Discovery
       return SXDiscoveryIsStarted();
 #else
       Debug.Log("Discovery::IsStarted()");
-      return false;
+      return true;
 #endif
     }
 
@@ -89,6 +89,8 @@ namespace MintFrogs.Discovery
     {
 #if UNITY_ANDROID
       QueryLocationServicesEnabledAndroidImpl();
+#elif UNITY_IOS
+      SXDisciveryIsLocationEnabled();
 #endif
     }
 
@@ -96,6 +98,11 @@ namespace MintFrogs.Discovery
     {
 #if UNITY_ANDROID
       RequestLocationPermissionsAndroidImpl();
+#elif UNITY_IOS
+      // XXX: iOS will ask permissions automatically while starting updates.
+      OnInnerLocationPermissionsResult("true");
+#else
+      OnInnerLocationPermissionsResult("true");
 #endif
     }
 
@@ -103,9 +110,9 @@ namespace MintFrogs.Discovery
     {
 #if UNITY_ANDROID
       return HasLocationPermissionsAndroidImpl();
-#else
-      return UnityEngine.Input.location.isEnabledByUser;
 #endif
+      // TODO: Implement properly for iOS
+      return true;
     }
 
     // --------------------------------------------------------------------------------------------
@@ -256,6 +263,8 @@ namespace MintFrogs.Discovery
       Debug.LogWarning(string.Format(LogFmt, "not initialized"));
       return false;
 #endif
+
+      return false;
     }
 
     // --------------------------------------------------------------------------------------------
@@ -274,6 +283,9 @@ namespace MintFrogs.Discovery
 
     [DllImport("__Internal")]
     private static extern bool SXDiscoveryIsStarted();
+
+    [DllImport("__Internal")]
+    private static extern bool SXDisciveryIsLocationEnabled();
 #endif
   }
 }

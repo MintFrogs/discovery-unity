@@ -22,3 +22,7 @@ void SXDiscoveryStop() {
 bool SXDiscoveryIsStarted() {
   return [[SXDiscoveryWarpper sharedInstance] isStarted];
 }
+
+bool SXDisciveryIsLocationEnabled() {
+  return [[SXDiscoveryWarpper sharedInstance] isLocationServicesEnabled];
+}

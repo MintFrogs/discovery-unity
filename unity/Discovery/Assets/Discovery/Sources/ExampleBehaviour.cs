@@ -43,10 +43,8 @@ namespace MintFrogs.Discovery
 
     public void OnInnerStartClick()
     {
-      outputText.text = "starting...";
-      startButton.interactable = false;
-      stopButton.interactable = true;
-      currentDiscovery.StartUpdates();
+      outputText.text = "quering...";
+      currentDiscovery.QueryLocationServicesEnabled();
     }
 
     public void OnInnerStopClick()
@@ -83,12 +81,41 @@ namespace MintFrogs.Discovery
 
     public void OnLocationStatusUpdate(bool isEnabled)
     {
-      outputText.text = "onLocationUpdate: " + isEnabled;
+      outputText.text = "onLocationStatusUpdate: " + isEnabled;
+
+      if (isEnabled)
+      {
+        if (currentDiscovery.HasLocationPermissions())
+        {
+          startButton.interactable = false;
+          stopButton.interactable = true;
+          currentDiscovery.StartUpdates();
+        }
+        else
+        {
+          currentDiscovery.RequestLocationPermissions();
+        }
+      }
+      else
+      {
+        outputText.text = "onLocationStatusUpdate: Disabled";
+      }
     }
 
     public void OnLocationPermissionsUpdate(bool isAllowed)
     {
       outputText.text = "onLocationPermissionsUpdate: " + isAllowed;
+
+      if (isAllowed)
+      {
+        startButton.interactable = false;
+        stopButton.interactable = true;
+        currentDiscovery.StartUpdates();
+      }
+      else
+      {
+        outputText.text = "onLocationPermissionsUpdate: Not Allowed";
+      }
     }
   }
 }

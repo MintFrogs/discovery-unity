@@ -12,4 +12,5 @@
 - (void)start;
 - (void)stop;
 - (BOOL)isStarted;
+- (BOOL)isLocationServicesEnabled;
 @end

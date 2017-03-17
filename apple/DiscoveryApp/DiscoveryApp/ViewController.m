@@ -25,8 +25,14 @@ void UnitySendMessage(const char *object, const char *message, const char *args)
 }
 
 - (void)viewWillAppear:(BOOL)animated {
-  [[SXDiscoveryWarpper sharedInstance] start];
-  [[SXDiscoveryWarpper sharedInstance] performSelector:@selector(stop) withObject:nil afterDelay:5.0];
+  SXDiscoveryWarpper *wapper = [SXDiscoveryWarpper sharedInstance];
+  
+  if ([wapper isLocationServicesEnabled]) {
+    [wapper start];
+    [wapper performSelector:@selector(stop) withObject:nil afterDelay:5.0];
+  } else {
+    NSLog(@"Disabled");
+  }
 }
 
 - (void)viewWillDisappear:(BOOL)animated {

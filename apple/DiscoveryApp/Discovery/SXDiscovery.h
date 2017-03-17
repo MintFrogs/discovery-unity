@@ -17,6 +17,7 @@ extern "C" {
   void SXDiscoveryStart();
   void SXDiscoveryStop();
   bool SXDiscoveryIsStarted();
+  bool SXDisciveryIsLocationEnabled();
   
 #ifdef __cplusplus
 }

@@ -10,6 +10,7 @@
 static const char *kUnityObject = "MfDiscoveryService";
 static const char *kUnityLocationUpdate = "OnInnerLocationUpdate";
 static const char *kUnityLocationError = "OnInnerLocationError";
+static const char *kUnityLocationStatusUpdate = "OnInnerLocationResolutionCallback";
 
 static const char *kLocationPermisssionsError = "missing-permission";
 static const char *kLocationConnectionError = "connection-error";
@@ -81,6 +82,12 @@ static const char *kLocationConnectionError = "connection-error";
 
 - (BOOL)isStarted {
   return self.started;
+}
+
+- (BOOL)isLocationServicesEnabled {
+  BOOL isEnabled = [CLLocationManager locationServicesEnabled];
+  UnitySendMessage(kUnityObject, kUnityLocationStatusUpdate, isEnabled ? "true" : "false");
+  return isEnabled;
 }
 
 - (void)locationManager:(CLLocationManager *)manager didChangeAuthorizationStatus:(CLAuthorizationStatus)sx {

@@ -31,10 +31,14 @@ public class OverrideActivity extends UnityPlayerActivity {
 
   @Override
   protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
-    final LocationSettingsStates locationStates = LocationSettingsStates.fromIntent(intent);
+    super.onActivityResult(requestCode, resultCode, intent);
+    Log.i(Discovery.TAG, "onActivityResult: " + requestCode + "/" + resultCode + "/" + intent);
 
-    if (requestCode == Discovery.PERMISSIONS_REQUEST) {
-      if (RESULT_OK == resultCode && locationStates.isLocationPresent()) {
+    final LocationSettingsStates locationStates = LocationSettingsStates.fromIntent(intent);
+    Log.i(Discovery.TAG, "onActivityResult-locationStates: " + locationStates);
+
+    if (requestCode == Discovery.RESOLUTION_REQUEST) {
+      if (RESULT_OK == resultCode) {
         InnerUnitySendMessage(Discovery.UNITY_OBJECT, Discovery.UNITY_RESOLUTION_CALLBACK, "true");
       } else if (RESULT_CANCELED == resultCode) {
         InnerUnitySendMessage(Discovery.UNITY_OBJECT, Discovery.UNITY_RESOLUTION_CALLBACK, "false");
