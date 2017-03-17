@@ -34,7 +34,7 @@ import java.util.ArrayList;
 import java.util.Date;
 
 public class Discovery implements ConnectionCallbacks, OnConnectionFailedListener, LocationListener {
-  private static final String TAG = Discovery.class.getSimpleName();
+  public static final String TAG = Discovery.class.getSimpleName();
 
   public static final String UNITY_OBJECT = "MfDiscoveryService";
   public static final String UNITY_UPDATE_CALLBACK = "OnInnerLocationUpdate";
@@ -42,8 +42,8 @@ public class Discovery implements ConnectionCallbacks, OnConnectionFailedListene
   public static final String UNITY_PERMISSIONS_CALLBACK = "OnInnerLocationPermissionsResult";
   public static final String UNITY_RESOLUTION_CALLBACK = "OnInnerLocationResolutionCallback";
 
-  public static int RESOLUTION_REQUEST = 0x010;
-  public static int PERMISSIONS_REQUEST = 0x020;
+  public static int RESOLUTION_REQUEST = 0x0100;
+  public static int PERMISSIONS_REQUEST = 0x0200;
 
   private static final String PERMISSION_ERROR = "missing-permission";
   private static final String CONNECTION_ERROR = "connection-error";
@@ -52,7 +52,9 @@ public class Discovery implements ConnectionCallbacks, OnConnectionFailedListene
   private GoogleApiClient mClient;
   private Activity mActivity;
   private boolean mStarted;
-  private boolean mStartUpdatesOnClientConnect;
+  private boolean mResolveOnConnect;
+  private OnLocationEnabledListener mLastResolveListener;
+  private boolean mLastResolveIndicator;
 
   public interface OnLocationEnabledListener {
     void onLocationEnabledResult(boolean isEnabled);
@@ -80,7 +82,6 @@ public class Discovery implements ConnectionCallbacks, OnConnectionFailedListene
       if (mClient.isConnected()) {
         startUpdates();
       } else {
-        mStartUpdatesOnClientConnect = true;
         mClient.connect();
       }
     }
@@ -100,7 +101,19 @@ public class Discovery implements ConnectionCallbacks, OnConnectionFailedListene
   }
 
   public void isLocationServicesEnabled(@Nullable final OnLocationEnabledListener listener, final boolean isResolution) {
-    Log.i(TAG, "request-location-services-availability: " + listener + "/" + isResolution);
+    Log.i(TAG, "request-location-services-availability: /listener: " +
+        listener + " /isResolve: " + isResolution + " /client: " + mClient.isConnected());
+
+    mLastResolveListener = listener;
+    mLastResolveIndicator = isResolution;
+    mResolveOnConnect = false;
+
+    if (!mClient.isConnected()) {
+      mResolveOnConnect = true;
+      mClient.connect();
+
+      return;
+    }
 
     if (hasLocationPermissions()) {
       LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder();
@@ -118,35 +131,19 @@ public class Discovery implements ConnectionCallbacks, OnConnectionFailedListene
           int statusCode = locationStatus.getStatusCode();
 
           if (LocationSettingsStatusCodes.SUCCESS == statusCode) {
-            if (null != listener) {
-              listener.onLocationEnabledResult(true);
-            } else {
-              UnityPlayer.UnitySendMessage(UNITY_OBJECT, UNITY_RESOLUTION_CALLBACK, "true");
-            }
+            notifyResolutionListeners(listener, true);
           } else if (LocationSettingsStatusCodes.RESOLUTION_REQUIRED == statusCode) {
             try {
               if (isResolution) {
                 locationStatus.startResolutionForResult(mActivity, RESOLUTION_REQUEST);
               } else {
-                if (null != listener) {
-                  listener.onLocationEnabledResult(false);
-                } else {
-                  UnityPlayer.UnitySendMessage(UNITY_OBJECT, UNITY_RESOLUTION_CALLBACK, "false");
-                }
+                notifyResolutionListeners(listener, false);
               }
             } catch (IntentSender.SendIntentException e) {
-              if (null != listener) {
-                listener.onLocationEnabledResult(false);
-              } else {
-                UnityPlayer.UnitySendMessage(UNITY_OBJECT, UNITY_RESOLUTION_CALLBACK, "false");
-              }
+              notifyResolutionListeners(listener, false);
             }
           } else {
-            if (null != listener) {
-              listener.onLocationEnabledResult(false);
-            } else {
-              UnityPlayer.UnitySendMessage(UNITY_OBJECT, UNITY_RESOLUTION_CALLBACK, "false");
-            }
+            notifyResolutionListeners(listener, false);
           }
         }
       });
@@ -201,9 +198,11 @@ public class Discovery implements ConnectionCallbacks, OnConnectionFailedListene
 
   @Override
   public void onConnected(@Nullable Bundle bundle) {
-    Log.i(TAG, "connected[" + mStartUpdatesOnClientConnect + "]... \\w" + mClient + " bundle: " + bundle);
+    Log.i(TAG, "connected[r/" + mResolveOnConnect + "]... \\w" + mClient + " bundle: " + bundle);
 
-    if (mStartUpdatesOnClientConnect) {
+    if (mResolveOnConnect) {
+      isLocationServicesEnabled(mLastResolveListener, mLastResolveIndicator);
+    } else {
       startUpdates();
     }
   }
@@ -290,5 +289,13 @@ public class Discovery implements ConnectionCallbacks, OnConnectionFailedListene
     items.add(Float.toString(location.getAccuracy()));
 
     return TextUtils.join(";", items);
+  }
+
+  private void notifyResolutionListeners(OnLocationEnabledListener listener, boolean isEnabled) {
+    if (null != listener) {
+      listener.onLocationEnabledResult(isEnabled);
+    } else if (isUnityEnv()) {
+      UnityPlayer.UnitySendMessage(UNITY_OBJECT, UNITY_RESOLUTION_CALLBACK, Boolean.toString(isEnabled));
+    }
   }
 }

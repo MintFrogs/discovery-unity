@@ -17,9 +17,8 @@ import java.util.Arrays;
 
 @SuppressLint("SetTextI18n")
 public class RootActivity extends AppCompatActivity {
-  private static final String TAG = RootActivity.class.getSimpleName();
   private Discovery mDiscovery;
-  private TextView mOuputText;
+  private TextView mOutputText;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -28,14 +27,14 @@ public class RootActivity extends AppCompatActivity {
 
     mDiscovery = new Discovery(new Settings(), this);
 
-    mOuputText = (TextView) findViewById(R.id.output_text);
-    mOuputText.setText("Created...");
+    mOutputText = (TextView) findViewById(R.id.output_text);
+    mOutputText.setText("Created...");
   }
 
   @Override
   protected void onStart() {
     super.onStart();
-    mOuputText.setText("Starting...");
+    mOutputText.setText("Starting...");
     startWithDiscovery();
   }
 
@@ -54,17 +53,19 @@ public class RootActivity extends AppCompatActivity {
     mDiscovery.isLocationServicesEnabled(new Discovery.OnLocationEnabledListener() {
       @Override
       public void onLocationEnabledResult(boolean isEnabled) {
-        mOuputText.setText("onLocationEnabledResult: " + isEnabled);
+        mOutputText.setText("onLocationEnabledResult: " + isEnabled);
 
         if (isEnabled) {
           if (mDiscovery.hasLocationPermissions()) {
+            mOutputText.setText("hasPermissions: true");
             mDiscovery.start();
           } else {
+            mOutputText.setText("hasPermissions: false/requesting");
             mDiscovery.requestLocationPermissions();
           }
         } else {
-          Log.i(TAG, "InnerUnitySendMessage(Discovery.UNITY_OBJECT, Discovery.UNITY_RESOLUTION_CALLBACK, \"false\")");
-          mOuputText.setText("LocationResult: Unresolved");
+          Log.i(Discovery.TAG, "InnerUnitySendMessage(Discovery.UNITY_OBJECT, Discovery.UNITY_RESOLUTION_CALLBACK, \"false\")");
+          mOutputText.setText("LocationResult: Unresolved");
         }
       }
     }, true);
@@ -74,26 +75,33 @@ public class RootActivity extends AppCompatActivity {
   public void onRequestPermissionsResult(int request, @NonNull String permissions[], @NonNull int[] results) {
     if (Discovery.PERMISSIONS_REQUEST == request) {
       if (results.length > 0 && results[0] == PackageManager.PERMISSION_GRANTED) {
-        Log.i(TAG, "InnerUnitySendMessage(Discovery.UNITY_OBJECT, Discovery.UNITY_PERMISSIONS_CALLBACK, \"true\")");
+        Log.i(Discovery.TAG, "InnerUnitySendMessage(Discovery.UNITY_OBJECT, Discovery.UNITY_PERMISSIONS_CALLBACK, \"true\")");
         startWithDiscovery();
       } else {
-        Log.i(TAG, "InnerUnitySendMessage(Discovery.UNITY_OBJECT, Discovery.UNITY_PERMISSIONS_CALLBACK, \"false\")");
-        mOuputText.setText("PermissionsResult[Declined]: " + Arrays.toString(results));
+        Log.i(Discovery.TAG, "InnerUnitySendMessage(Discovery.UNITY_OBJECT, Discovery.UNITY_PERMISSIONS_CALLBACK, \"false\")");
+        mOutputText.setText("PermissionsResult[Declined]: " + Arrays.toString(results));
       }
     }
   }
 
   @Override
   protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
-    final LocationSettingsStates locationStates = LocationSettingsStates.fromIntent(intent);
+    super.onActivityResult(requestCode, resultCode, intent);
 
-    if (requestCode == Discovery.PERMISSIONS_REQUEST) {
-      if (RESULT_OK == resultCode && locationStates.isLocationPresent()) {
-        Log.i(TAG, "InnerUnitySendMessage(Discovery.UNITY_OBJECT, Discovery.UNITY_RESOLUTION_CALLBACK, \"true\")");
+    Log.i(Discovery.TAG, "onActivityResult: " + requestCode + "/" + resultCode + "/" + intent);
+    mOutputText.setText("Result: " + requestCode);
+
+    final LocationSettingsStates locationStates = LocationSettingsStates.fromIntent(intent);
+    Log.i(Discovery.TAG, "onActivityResult-locationStates: " + locationStates);
+
+    if (requestCode == Discovery.RESOLUTION_REQUEST) {
+      if (RESULT_OK == resultCode) {
+        Log.i(Discovery.TAG, "InnerUnitySendMessage(Discovery.UNITY_OBJECT, Discovery.UNITY_RESOLUTION_CALLBACK, \"true\")");
+        mOutputText.setText("LocationResult[Resolved]: " + resultCode);
         startWithDiscovery();
       } else if (RESULT_CANCELED == resultCode) {
-        Log.i(TAG, "InnerUnitySendMessage(Discovery.UNITY_OBJECT, Discovery.UNITY_RESOLUTION_CALLBACK, \"false\")");
-        mOuputText.setText("LocationResult[Declined]: " + resultCode);
+        Log.i(Discovery.TAG, "InnerUnitySendMessage(Discovery.UNITY_OBJECT, Discovery.UNITY_RESOLUTION_CALLBACK, \"false\")");
+        mOutputText.setText("LocationResult[Declined]: " + resultCode);
       }
     }
   }
