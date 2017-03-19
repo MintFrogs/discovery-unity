@@ -50,19 +50,19 @@ public class RootActivity extends AppCompatActivity {
   }
 
   private void startWithDiscovery() {
+    if (!mDiscovery.hasLocationPermissions()) {
+      mOutputText.setText("hasPermissions: false/requesting");
+      mDiscovery.requestLocationPermissions();
+      return;
+    }
+
     mDiscovery.isLocationServicesEnabled(new Discovery.OnLocationEnabledListener() {
       @Override
       public void onLocationEnabledResult(boolean isEnabled) {
         mOutputText.setText("onLocationEnabledResult: " + isEnabled);
 
         if (isEnabled) {
-          if (mDiscovery.hasLocationPermissions()) {
-            mOutputText.setText("hasPermissions: true");
-            mDiscovery.start();
-          } else {
-            mOutputText.setText("hasPermissions: false/requesting");
-            mDiscovery.requestLocationPermissions();
-          }
+          mDiscovery.start();
         } else {
           Log.i(Discovery.TAG, "InnerUnitySendMessage(Discovery.UNITY_OBJECT, Discovery.UNITY_RESOLUTION_CALLBACK, \"false\")");
           mOutputText.setText("LocationResult: Unresolved");

@@ -115,47 +115,37 @@ public class Discovery implements ConnectionCallbacks, OnConnectionFailedListene
       return;
     }
 
-    if (hasLocationPermissions()) {
-      LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder();
-      builder.addLocationRequest(newLocationRequestInstance());
+    LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder();
+    builder.addLocationRequest(newLocationRequestInstance());
 
-      PendingResult<LocationSettingsResult> result;
-      result = LocationServices.SettingsApi.checkLocationSettings(mClient, builder.build());
+    PendingResult<LocationSettingsResult> result;
+    result = LocationServices.SettingsApi.checkLocationSettings(mClient, builder.build());
 
-      result.setResultCallback(new ResultCallback<LocationSettingsResult>() {
-        @Override
-        public void onResult(@NonNull LocationSettingsResult settingsResult) {
-          Log.i(TAG, "location-result-callback: " + settingsResult);
+    result.setResultCallback(new ResultCallback<LocationSettingsResult>() {
+      @Override
+      public void onResult(@NonNull LocationSettingsResult settingsResult) {
+        Log.i(TAG, "location-result-callback: " + settingsResult);
 
-          Status locationStatus = settingsResult.getStatus();
-          int statusCode = locationStatus.getStatusCode();
+        Status locationStatus = settingsResult.getStatus();
+        int statusCode = locationStatus.getStatusCode();
 
-          if (LocationSettingsStatusCodes.SUCCESS == statusCode) {
-            notifyResolutionListeners(listener, true);
-          } else if (LocationSettingsStatusCodes.RESOLUTION_REQUIRED == statusCode) {
-            try {
-              if (isResolution) {
-                locationStatus.startResolutionForResult(mActivity, RESOLUTION_REQUEST);
-              } else {
-                notifyResolutionListeners(listener, false);
-              }
-            } catch (IntentSender.SendIntentException e) {
+        if (LocationSettingsStatusCodes.SUCCESS == statusCode) {
+          notifyResolutionListeners(listener, true);
+        } else if (LocationSettingsStatusCodes.RESOLUTION_REQUIRED == statusCode) {
+          try {
+            if (isResolution) {
+              locationStatus.startResolutionForResult(mActivity, RESOLUTION_REQUEST);
+            } else {
               notifyResolutionListeners(listener, false);
             }
-          } else {
+          } catch (IntentSender.SendIntentException e) {
             notifyResolutionListeners(listener, false);
           }
-        }
-      });
-    } else {
-      if (isUnityEnv()) {
-        UnityPlayer.UnitySendMessage(UNITY_OBJECT, UNITY_ERROR_CALLBACK, PERMISSION_ERROR);
-      } else {
-        if (null != listener) {
-          listener.onLocationEnabledResult(false);
+        } else {
+          notifyResolutionListeners(listener, false);
         }
       }
-    }
+    });
   }
 
   @SuppressLint("NewApi")
@@ -170,7 +160,7 @@ public class Discovery implements ConnectionCallbacks, OnConnectionFailedListene
   public boolean hasLocationPermissions() {
     boolean hasPermissions = true;
 
-    if (Build.VERSION.SDK_INT > 23) {
+    if (Build.VERSION.SDK_INT >= 23) {
       int isFineGranted = ActivityCompat.checkSelfPermission(mActivity, permission.ACCESS_FINE_LOCATION);
       int isCoarseGranted = ActivityCompat.checkSelfPermission(mActivity, permission.ACCESS_COARSE_LOCATION);
 
@@ -262,6 +252,7 @@ public class Discovery implements ConnectionCallbacks, OnConnectionFailedListene
       LocationServices.FusedLocationApi.requestLocationUpdates(mClient, req, this);
 
       mStarted = true;
+      Log.i(TAG, "starting-updates: " + req);
     } else {
       if (isUnityEnv()) {
         UnityPlayer.UnitySendMessage(UNITY_OBJECT, UNITY_ERROR_CALLBACK, PERMISSION_ERROR);
