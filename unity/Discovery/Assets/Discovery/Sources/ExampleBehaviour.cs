@@ -44,7 +44,26 @@ namespace MintFrogs.Discovery
     public void OnInnerStartClick()
     {
       outputText.text = "quering...";
-      currentDiscovery.QueryLocationServicesEnabled();
+
+      // XXX: First, you request permissions, then query for
+      // location availability. For iOS, first step will return
+      // TRUE (Always) and when you start services, iOS automatically
+      // will ask for permissions.
+
+      // XXX: Also, for Android, when you ask if services enabled,
+      // resolution window will be shown to the user, for iOS, it
+      // will simply return status of services availability.
+
+      // XXX: Main case here: Android - prmissions BEFORE availability,
+      // on iOS AFTER.
+      if (currentDiscovery.HasLocationPermissions())
+      {
+        currentDiscovery.QueryLocationServicesEnabled();
+      }
+      else
+      {
+        currentDiscovery.RequestLocationPermissions();
+      }
     }
 
     public void OnInnerStopClick()
@@ -54,18 +73,6 @@ namespace MintFrogs.Discovery
       stopButton.interactable = false;
       currentDiscovery.StopUpdates();
       outputText.text = "Output Text";
-    }
-
-    public void OnInnerUpdateLocationStatus()
-    {
-      outputText.text = "quering status...";
-      currentDiscovery.QueryLocationServicesEnabled();
-    }
-
-    public void OnInnerUpdateLocationPermissions()
-    {
-      outputText.text = "quering permissions... has: [" + currentDiscovery.HasLocationPermissions() + "]";
-      currentDiscovery.RequestLocationPermissions();
     }
 
     public void OnLocationUpdate(Location location)
@@ -85,19 +92,14 @@ namespace MintFrogs.Discovery
 
       if (isEnabled)
       {
-        if (currentDiscovery.HasLocationPermissions())
-        {
-          startButton.interactable = false;
-          stopButton.interactable = true;
-          currentDiscovery.StartUpdates();
-        }
-        else
-        {
-          currentDiscovery.RequestLocationPermissions();
-        }
+        startButton.interactable = false;
+        stopButton.interactable = true;
+        currentDiscovery.StartUpdates();
       }
       else
       {
+        startButton.interactable = true;
+        stopButton.interactable = false;
         outputText.text = "onLocationStatusUpdate: Disabled";
       }
     }
@@ -110,7 +112,7 @@ namespace MintFrogs.Discovery
       {
         startButton.interactable = false;
         stopButton.interactable = true;
-        currentDiscovery.StartUpdates();
+        currentDiscovery.QueryLocationServicesEnabled();
       }
       else
       {
