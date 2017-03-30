@@ -247,7 +247,10 @@ public class Discovery implements ConnectionCallbacks, OnConnectionFailedListene
 
   @SuppressWarnings("MissingPermission")
   private void startUpdates() {
-    if (hasLocationPermissions()) {
+    Log.i(TAG, "startUpdates");
+
+    if (hasLocationPermissions() && !mStarted) {
+      Log.i(TAG, "request-updates");
       LocationRequest req = newLocationRequestInstance();
       LocationServices.FusedLocationApi.requestLocationUpdates(mClient, req, this);
 
@@ -261,7 +264,10 @@ public class Discovery implements ConnectionCallbacks, OnConnectionFailedListene
   }
 
   private void stopUpdates() {
+    Log.i(TAG, "stopUpdates");
+
     if (mStarted) {
+      Log.i(TAG, "request-stop-updates: " + mClient);
       LocationServices.FusedLocationApi.removeLocationUpdates(mClient, this);
       mStarted = false;
     }
