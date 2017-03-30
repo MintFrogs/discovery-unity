@@ -1,0 +1,16 @@
+{
+	"folders":
+	[
+		{
+      "follow_symlinks": true,
+			"path": ".",
+      "file_exclude_patterns":
+      [
+        "*.dll",
+        "*.meta"
+      ]
+		}
+	],
+  "solution_file": "./Discovery.sln"
+}
+

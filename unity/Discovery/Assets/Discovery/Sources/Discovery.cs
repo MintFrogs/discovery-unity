@@ -1,6 +1,7 @@
 ﻿// Copyright (c) 2017 Sergey Ivonchik
 // This code is licensed under MIT license (See LICENSE for details)
 
+using System;
 using JetBrains.Annotations;
 using UnityEngine;
 
@@ -12,6 +13,7 @@ namespace MintFrogs.Discovery
 {
   public class Discovery : MonoBehaviour
   {
+    private const string GameObjectName = "MfDiscoveryService";
     private const string LogFmt = "Discovery::{0}";
     private const string DiscoveryClazz = "com.mintfrogs.discovery.android.Discovery";
     private const string DiscoverySettingsClazz = "com.mintfrogs.discovery.android.Settings";
@@ -39,6 +41,11 @@ namespace MintFrogs.Discovery
     {
       currentSettings = settings;
 
+      if (RichUnity.IsAnyEditor())
+      {
+        return;
+      }
+
 #if UNITY_ANDROID
       InitializeAndroidImpl();
 #elif UNITY_IOS
@@ -50,20 +57,30 @@ namespace MintFrogs.Discovery
 
     public void StartUpdates()
     {
+      if (RichUnity.IsAnyEditor())
+      {
+        if (null != OnLocationUpdate)
+        {
+          OnLocationUpdate(Location.Default());
+        }
+
+        return;
+      }
+
 #if UNITY_ANDROID
       StartAndroidImpl();
 #elif UNITY_IOS
       SXDiscoveryStart();
-#else
-      if (null != OnLocationUpdate)
-      {
-        OnLocationUpdate(Location.Default());
-      }
 #endif
     }
 
     public void StopUpdates()
     {
+      if (RichUnity.IsAnyEditor())
+      {
+        return;
+      }
+
 #if UNITY_ANDROID
       StopAndroidImpl();
 #elif UNITY_IOS
@@ -87,6 +104,12 @@ namespace MintFrogs.Discovery
 
     public void QueryLocationServicesEnabled()
     {
+      if (RichUnity.IsAnyEditor() && null != OnLocationStatusUpdate)
+      {
+        OnLocationStatusUpdate(Input.location.isEnabledByUser);
+        return;
+      }
+
 #if UNITY_ANDROID
       QueryLocationServicesEnabledAndroidImpl();
 #elif UNITY_IOS
@@ -96,6 +119,12 @@ namespace MintFrogs.Discovery
 
     public void RequestLocationPermissions()
     {
+      if (RichUnity.IsAnyEditor() && null != OnLocationPermissionsUpdate)
+      {
+        OnLocationPermissionsUpdate(true);
+        return;
+      }
+
 #if UNITY_ANDROID
       RequestLocationPermissionsAndroidImpl();
 #elif UNITY_IOS
@@ -128,6 +157,11 @@ namespace MintFrogs.Discovery
       }
       else
       {
+        if (name != GameObjectName)
+        {
+          throw new SystemException("Discover object name must be: " + GameObjectName);
+        }
+
         Instance = this;
         DontDestroyOnLoad(gameObject);
       }
