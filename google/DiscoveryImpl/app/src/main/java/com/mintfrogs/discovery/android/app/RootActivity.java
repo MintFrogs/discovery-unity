@@ -25,7 +25,7 @@ public class RootActivity extends AppCompatActivity {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.root_activity);
 
-    mDiscovery = new Discovery(new Settings(), this);
+    mDiscovery = Discovery.getInstance(new Settings(), this);
 
     mOutputText = (TextView) findViewById(R.id.output_text);
     mOutputText.setText("Created...");

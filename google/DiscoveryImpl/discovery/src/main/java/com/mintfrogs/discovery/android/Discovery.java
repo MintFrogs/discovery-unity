@@ -48,6 +48,8 @@ public class Discovery implements ConnectionCallbacks, OnConnectionFailedListene
   private static final String PERMISSION_ERROR = "missing-permission";
   private static final String CONNECTION_ERROR = "connection-error";
 
+  private static Discovery sInstance;
+
   private Settings mSettings;
   private GoogleApiClient mClient;
   private Activity mActivity;
@@ -69,7 +71,15 @@ public class Discovery implements ConnectionCallbacks, OnConnectionFailedListene
     }
   }
 
-  public Discovery(Settings settings, @Nullable Activity atv) {
+  public static Discovery getInstance(Settings settings, @Nullable Activity atv) {
+    if (null == sInstance) {
+      sInstance = new Discovery(settings, atv);
+    }
+
+    return sInstance;
+  }
+
+  private Discovery(Settings settings, @Nullable Activity atv) {
     mSettings = settings;
     mActivity = null == atv ? UnityPlayer.currentActivity : atv;
     mClient = newClientInstance(mActivity.getApplicationContext());
@@ -247,7 +257,7 @@ public class Discovery implements ConnectionCallbacks, OnConnectionFailedListene
 
   @SuppressWarnings("MissingPermission")
   private void startUpdates() {
-    Log.i(TAG, "startUpdates");
+    Log.i(TAG, "startUpdates: isStarted: " + isStarted());
 
     if (hasLocationPermissions() && !mStarted) {
       Log.i(TAG, "request-updates");
@@ -255,7 +265,7 @@ public class Discovery implements ConnectionCallbacks, OnConnectionFailedListene
       LocationServices.FusedLocationApi.requestLocationUpdates(mClient, req, this);
 
       mStarted = true;
-      Log.i(TAG, "starting-updates: " + req);
+      Log.i(TAG, "starting-updates: " + req + " isStarted: " + isStarted());
     } else {
       if (isUnityEnv()) {
         UnityPlayer.UnitySendMessage(UNITY_OBJECT, UNITY_ERROR_CALLBACK, PERMISSION_ERROR);
@@ -264,9 +274,9 @@ public class Discovery implements ConnectionCallbacks, OnConnectionFailedListene
   }
 
   private void stopUpdates() {
-    Log.i(TAG, "stopUpdates");
+    Log.i(TAG, "stopUpdates: isStarted: " + isStarted() + "client: " + mClient);
 
-    if (mStarted) {
+    if (null != mClient) {
       Log.i(TAG, "request-stop-updates: " + mClient);
       LocationServices.FusedLocationApi.removeLocationUpdates(mClient, this);
       mStarted = false;

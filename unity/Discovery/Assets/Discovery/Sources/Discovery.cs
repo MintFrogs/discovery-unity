@@ -55,6 +55,11 @@ namespace MintFrogs.Discovery
 #endif
     }
 
+    public bool IsInitialized()
+    {
+      return null != currentSettings;
+    }
+
     public void StartUpdates()
     {
       if (RichUnity.IsAnyEditor())
@@ -215,7 +220,7 @@ namespace MintFrogs.Discovery
       var accuracy = currentSettings.Accuracy;
 
       var settingsObject = new AndroidJavaObject(DiscoverySettingsClazz, interval, fastestInterval, accuracy);
-      var discoveryObject = new AndroidJavaObject(DiscoveryClazz, settingsObject, null);
+      var discoveryObject = new AndroidJavaClass(DiscoveryClazz).CallStatic<AndroidJavaObject>("getInstance", settingsObject, null);
 
       currentDiscoveryObject = discoveryObject;
 #endif
